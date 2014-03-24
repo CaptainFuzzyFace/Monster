@@ -17,6 +17,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.util.Date;
+
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
@@ -61,8 +63,8 @@ public class FullscreenActivity extends Activity {
      * App shared preferences
      */
     SharedPreferences sharedPreferences;
-    private String dateLastUsed;
-    private long usedCount;
+    //private String dateLastUsed;
+    //private long usedCount;
     private static final String PREF_DATE_LAST_USED = "Date Last Used";
     private static final String PREF_USED_COUNT = "Used Count";
 
@@ -156,6 +158,14 @@ public class FullscreenActivity extends Activity {
         delayedHide(100);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Same the shared preferences
+        writeSharedPreferences();
+    }
+
 
     /**
      * Touch listener to use for in-layout UI controls to delay hiding the
@@ -229,16 +239,19 @@ public class FullscreenActivity extends Activity {
     private void writeSharedPreferences() {
         // Update and write out shared preferences
         long counter = 0;
+        Date now = new Date();
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
         if (sharedPreferences.contains(PREF_USED_COUNT)) {
+            // Used previously
             counter = sharedPreferences.getLong(PREF_USED_COUNT, 0l);
         }
         editor.putLong(PREF_USED_COUNT, ++counter);
-        editor.putString(PREF_DATE_LAST_USED, today);
+        editor.putString(PREF_DATE_LAST_USED, now.toString());
         editor.commit();
-        Toast.makeText(getApplicationContext(), "Application used " + counter.toString(),
-                Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext()
+                , "Application used " + String.valueOf(counter) + " times since installed and that last time was "
+                    + now.toString(), Toast.LENGTH_SHORT).show();
     }
 
 }

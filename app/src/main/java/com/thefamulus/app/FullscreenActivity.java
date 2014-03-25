@@ -132,20 +132,8 @@ public class FullscreenActivity extends Activity {
             }
         });
 
-        final Button refreshButton = (Button) findViewById(R.id.buttonRefresh);
-        refreshButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Perform action on click
-                // Refresh list;
-                Toast.makeText(getApplicationContext(), "Go Refresh()",
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        refreshButton.setOnTouchListener(mDelayHideTouchListener);
+        // Create blocks for each of the existing block types
+        findAndInstantiate();
     }
 
     @Override
@@ -213,22 +201,23 @@ public class FullscreenActivity extends Activity {
         switch (item.getItemId()) {
             case R.id.action_refresh:
                 // Refresh list;
-                Toast.makeText(getApplicationContext(), "Go Refresh",
+                Toast.makeText(getApplicationContext(), "Refresh List",
                         Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.action_new:
                 // make new;
+                newBlock();
                 Toast.makeText(getApplicationContext(), "Create an New Item",
                         Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.action_search:
                 // Search for...;
-                Toast.makeText(getApplicationContext(), "Go Search",
+                Toast.makeText(getApplicationContext(), "Search List",
                         Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.action_settings:
                 // Settings();
-                Toast.makeText(getApplicationContext(), "Go Settings",
+                Toast.makeText(getApplicationContext(), "Settings",
                         Toast.LENGTH_SHORT).show();
                 return true;
             default:
@@ -252,6 +241,15 @@ public class FullscreenActivity extends Activity {
         Toast.makeText(getApplicationContext()
                 , "Application used " + String.valueOf(counter) + " times since installed and that last time was "
                     + now.toString(), Toast.LENGTH_SHORT).show();
+    }
+
+    private void newBlock() {
+        // Create a new block
+    }
+
+    private void findAndInstantiate() {
+        // Find each of the existing items that can be represented as blocks
+        // and create the blocks for each
     }
 
 }

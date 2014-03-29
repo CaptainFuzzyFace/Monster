@@ -4,32 +4,50 @@
     android:id="@+id/alarmBlock"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#ff46f3">
+    android:layout_height="wrap_content"
+    android:background="#222222">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/alarmDetails"
         android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="fill_horizontal"
+        android:layout_gravity="right"
+        android:layout_weight="1">
+
         <TextView
             android:id="@+id/alarmName"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="30dp"
             android:text="@string/title_alarm"
             android:layout_gravity="center_horizontal"
             android:gravity="center"
-            android:textSize="20dp" />
+            android:textSize="15dp"
+            android:textColor="@android:color/white" />
 
         <TextView
             android:id="@+id/alarmTimer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_gravity="center_horizontal"
-            android:text="9999:59"
-            android:gravity="center_horizontal"
-            android:textSize="40dp" />
+            android:text="99:23:59"
+            android:gravity="center"
+            android:textSize="30dp"
+            android:background="@android:color/transparent"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/alarmSet"
+        android:layout_width="wrap_content"
+        android:layout_height="80dp"
+        android:layout_gravity="center_horizontal"
+        android:text="None"
+        android:gravity="center"
+        android:textSize="20dp"
+        android:background="@android:color/transparent"
+        android:textColor="@android:color/white" />
 
 </LinearLayout>

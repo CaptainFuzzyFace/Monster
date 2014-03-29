@@ -17,7 +17,13 @@ import android.widget.Toast;
 
 import com.thefamulus.app.util.SystemUiHider;
 
+import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -32,6 +38,9 @@ public class FullscreenActivity extends Activity {
      */
     private static final String appId = "com.thefamulus.app";
     private static final String logCatId = "MAB";
+    private static final int msecMinute = 1000 * 60;
+    private static final int msecHour = msecMinute * 60;
+    private static final int msecDay = msecHour * 24;
 
     /**
      * App shared preferences
@@ -141,21 +150,21 @@ public class FullscreenActivity extends Activity {
 
     private void findNextAlarm(LinearLayout mainContainer) {
         // Find if any alarms are set and build blocks for each
-        String nextAlarm = Settings.System.getString(getContentResolver(),
-                Settings.System.NEXT_ALARM_FORMATTED);
+        //String nextAlarm = Settings.System.getString(getContentResolver(), Settings.System.NEXT_ALARM_FORMATTED);
+        final Date nextAlarm = getNextAlarm(getApplicationContext());
+        final Date now = new Date();
 
-        if (nextAlarm != "") {
+        if (nextAlarm != null) {
 
-            // How long between now and the alarm?
-            final int spaceIndex = nextAlarm.indexOf(" ");
-            final String alarmDay = nextAlarm.substring(0,spaceIndex-1);
-            final String alarmTime = nextAlarm.substring(spaceIndex+1);
+            // Set the time on the clock
+            //final AnalogClock alarmTime = (AnalogClock) findViewById(R.id.analogClock);
 
-
-            mAlarm = new AlarmTimer(9999l, ALARM_UPDATE_MSEC);
-            Log.i(logCatId, "Alarm:" + nextAlarm);
+            mAlarm = new AlarmTimer(nextAlarm.getTime() - now.getTime(), ALARM_UPDATE_MSEC);
             mAlarmView = getLayoutInflater().inflate(R.layout.alarm,mainContainer,false);
             mAlarmDisplay = (TextView) mAlarmView.findViewById(R.id.alarmTimer);
+            final TextView alarmTime = (TextView) mAlarmView.findViewById(R.id.alarmSet);
+            alarmTime.setText(Settings.System.getString(getApplicationContext().getContentResolver(), Settings.System.NEXT_ALARM_FORMATTED));
+
             //mAlarmDisplay.setText("@string/alarmPrepare");
             mAlarmDisplay.setText("Preparing alarm...");
             mainContainer.addView(mAlarmView);
@@ -182,10 +191,74 @@ public class FullscreenActivity extends Activity {
 
         @Override
         public void onTick(long msecRemaining) {
-            // Milli seconds remaining
-            Log.i(logCatId, "Tick:" + Long.toString(msecRemaining / 1000));
-            mAlarmDisplay.setText(Long.toString(msecRemaining / 1000));
+            // Days...
+            final int days = (int) msecRemaining / msecDay;
+            final int hours = (int) (msecRemaining - (days * msecDay)) / msecHour;
+            final int minutes = (int) (msecRemaining - (days * msecDay) - (hours * msecHour)) / msecMinute;
+
+            if (days > 0)
+                mAlarmDisplay.setText("Ages yet...");
+            else if (hours > 1)
+                mAlarmDisplay.setText(Integer.toString(hours) + " hours " + Integer.toString(minutes) + " mins");
+            else if (hours > 0)
+                mAlarmDisplay.setText(Integer.toString(hours) + " hour " + Integer.toString(minutes) + " mins");
+            else if (minutes > 1)
+                mAlarmDisplay.setText(Integer.toString(minutes) + " mins");
+            else
+                mAlarmDisplay.setText(Integer.toString(minutes) + " min");
+
         }
+    }
+
+    public static Date getNextAlarm(Context context) {
+        // let's collect short names of days :-)
+        DateFormatSymbols symbols = new DateFormatSymbols();
+        // and fill with those names map...
+        Map<String, Integer> map = new HashMap<String, Integer>();
+        String[] dayNames = symbols.getShortWeekdays();
+        // filing :-)
+        map.put(dayNames[Calendar.MONDAY], Calendar.TUESDAY);
+        map.put(dayNames[Calendar.TUESDAY], Calendar.WEDNESDAY);
+        map.put(dayNames[Calendar.WEDNESDAY], Calendar.THURSDAY);
+        map.put(dayNames[Calendar.THURSDAY], Calendar.FRIDAY);
+        map.put(dayNames[Calendar.FRIDAY], Calendar.SATURDAY);
+        map.put(dayNames[Calendar.SATURDAY], Calendar.SUNDAY);
+        map.put(dayNames[Calendar.SUNDAY], Calendar.MONDAY);
+        // Yeah, knowing next alarm will help.....
+        String nextAlarm = Settings.System.getString(context.getContentResolver(), Settings.System.NEXT_ALARM_FORMATTED);
+        // In case if it isn't set.....
+        if ((nextAlarm == null) || ("".equals(nextAlarm))) return null;
+        // let's see a day....
+        String nextAlarmDay = nextAlarm.split(" ")[0];
+        // and its number....
+        int alarmDay = map.get(nextAlarmDay);
+
+        // the same for day of week (I'm not sure why I didn't use Calendar.get(Calendar.DAY_OF_WEEK) here...
+        Date now = new Date();
+        String dayOfWeek = new SimpleDateFormat("EE", Locale.getDefault()).format(now);
+        int today = map.get(dayOfWeek);
+
+        // OK, so let's calculate how many days we have to next alarm :-)
+        int daysToAlarm = alarmDay - today;
+        // yep, sometimes it will  be negtive number so add 7.
+        if (daysToAlarm < 0) daysToAlarm += 7;
+
+        // Now we will build date, and parse it.....
+        try {
+            Calendar cal2 = Calendar.getInstance();
+            String str = cal2.get(Calendar.YEAR) + "-" + (cal2.get(Calendar.MONTH) + 1) + "-" + (cal2.get(Calendar.DAY_OF_MONTH));
+
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-d hh:mm");
+
+            cal2.setTime(df.parse(str + nextAlarm.substring(nextAlarm.indexOf(" "))));
+            cal2.add(Calendar.DAY_OF_YEAR, daysToAlarm);
+            // and return it
+            return cal2.getTime();
+        } catch (Exception e) {
+
+        }
+        // in case if we cannot calculate...
+        return null;
     }
 }
 

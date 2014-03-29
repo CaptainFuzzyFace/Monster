@@ -9,6 +9,11 @@ public class Block {
 
     // Must have a view
     View blockView;
+    int blockPriority = 0;
+    int blockRefresh = 0;
+    // TODO onClick method
+
+
 
     // Auto refresh interval
     int autoRefreshInterval = 0;
